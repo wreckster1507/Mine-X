@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
@@ -5,6 +7,8 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { ChevronDownIcon, ChevronUpIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import Navbar from './Navbar';
+import { useNavigate } from 'react-router-dom'; // Use useNavigate instead of useHistory
+
 
 const ShiftLogList = () => {
     const [shiftLogs, setShiftLogs] = useState([]);
@@ -12,11 +16,12 @@ const ShiftLogList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [expandedLogs, setExpandedLogs] = useState({});
+    const navigate = useNavigate(); // Initialize navigate for navigation
 
     useEffect(() => {
         const fetchLogs = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/shiftLogs', {
+                const response = await axios.get('http://localhost:3000/api/shiftLogs', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
                 });
                 setShiftLogs(response.data);
@@ -31,21 +36,109 @@ const ShiftLogList = () => {
         fetchLogs();
     }, []);
 
-    const generateSummary = async (logId) => {
-        const log = shiftLogs.find(log => log._id === logId);
-        if (!log) return;
 
+
+
+
+    const handleGenerateSummary = async (logId) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/summarize/summarize', { shiftLogs: [log] }, {
+            const log = shiftLogs.find(log => log._id === logId);
+            if (!log) return;
+
+            const response = await axios.post('http://localhost:3000/api/generateSummary', { shiftLog: log }, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
-            setSummaries(prevSummaries => ({ ...prevSummaries, [logId]: response.data.summary }));
+
+            const { summary, importantData } = response.data;
+            navigate(`/summary/${logId}`, { state: { summary, importantData } }); // Use navigate for navigation
         } catch (err) {
             console.error('Error generating summary:', err);
         }
     };
 
-    const exportToPDF = () => {
+
+    const exportLogToPDF = (log) => {
+        const doc = new jsPDF();
+        doc.setFontSize(12);
+        let y = 10;
+
+        doc.text(`Shift Log`, 10, y);
+        y += 10;
+        doc.text(`Date: ${log.date}`, 10, y);
+        y += 10;
+        doc.text(`Shift: ${log.shift}`, 10, y);
+        y += 10;
+        doc.text(`Total Tonnage Mined: ${log.productionData.totalTonnageMined}`, 10, y);
+        y += 10;
+        doc.text(`Active Machines: ${log.productionData.activeMachines}`, 10, y);
+        y += 10;
+        doc.text(`Machine Downtime: ${log.productionData.machineDowntime}`, 10, y);
+        y += 10;
+        doc.text(`Additional Notes: ${log.productionData.additionalNotes}`, 10, y);
+        y += 10;
+        doc.text(`Incidents: ${log.safetyReports.incidents}`, 10, y);
+        y += 10;
+        doc.text(`Near Misses: ${log.safetyReports.nearMisses}`, 10, y);
+        y += 10;
+        doc.text(`Hazards Identified: ${log.safetyReports.hazardsIdentified}`, 10, y);
+        y += 10;
+        doc.text(`Completed Tasks: ${log.workProgress.completedTasks}`, 10, y);
+        y += 10;
+        doc.text(`Ongoing Work: ${log.workProgress.ongoingWork}`, 10, y);
+        y += 10;
+        doc.text(`Upcoming Work: ${log.workProgress.upcomingWork}`, 10, y);
+        y += 10;
+        doc.text(`Machine Status: Excavator: ${log.machineStatus.excavator}, Conveyor: ${log.machineStatus.conveyor}, Crusher: ${log.machineStatus.crusher}`, 10, y);
+        y += 10;
+        doc.text(`Shift Supervisor: ${log.personnelInformation.shiftSupervisor}`, 10, y);
+        y += 10;
+        doc.text(`Key Personnel Changes: ${log.personnelInformation.keyPersonnelChanges}`, 10, y);
+        y += 10;
+        doc.text(`Notes for Incoming Shift: ${log.notesForIncomingShift}`, 10, y);
+        y += 10;
+        doc.text(`Signed By: ${log.signedBy}`, 10, y);
+        y += 10;
+        doc.text(`Time: ${log.time}`, 10, y);
+
+        if (summaries[log._id]) {
+            y += 10;
+            doc.text(`Summary: ${summaries[log._id]}`, 10, y);
+        }
+
+        doc.save(`shift_log_${log.date}.pdf`);
+    };
+
+    const exportLogToExcel = (log) => {
+        const ws = XLSX.utils.json_to_sheet([{
+            Date: log.date,
+            Shift: log.shift,
+            TotalTonnageMined: log.productionData.totalTonnageMined,
+            ActiveMachines: log.productionData.activeMachines,
+            MachineDowntime: log.productionData.machineDowntime,
+            AdditionalNotes: log.productionData.additionalNotes,
+            Incidents: log.safetyReports.incidents,
+            NearMisses: log.safetyReports.nearMisses,
+            HazardsIdentified: log.safetyReports.hazardsIdentified,
+            CompletedTasks: log.workProgress.completedTasks,
+            OngoingWork: log.workProgress.ongoingWork,
+            UpcomingWork: log.workProgress.upcomingWork,
+            MachineStatusExcavator: log.machineStatus.excavator,
+            MachineStatusConveyor: log.machineStatus.conveyor,
+            MachineStatusCrusher: log.machineStatus.crusher,
+            ShiftSupervisor: log.personnelInformation.shiftSupervisor,
+            KeyPersonnelChanges: log.personnelInformation.keyPersonnelChanges,
+            NotesForIncomingShift: log.notesForIncomingShift,
+            SignedBy: log.signedBy,
+            Time: log.time,
+            Summary: summaries[log._id] || ''
+        }]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Shift Log');
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        saveAs(new Blob([wbout], { type: 'application/octet-stream' }), `shift_log_${log.date}.xlsx`);
+    };
+
+    const exportAllToPDF = () => {
         const doc = new jsPDF();
         doc.setFontSize(12);
 
@@ -100,7 +193,7 @@ const ShiftLogList = () => {
         doc.save('shift_logs.pdf');
     };
 
-    const exportToExcel = () => {
+    const exportAllToExcel = () => {
         const ws = XLSX.utils.json_to_sheet(shiftLogs.map(log => ({
             Date: log.date,
             Shift: log.shift,
@@ -142,28 +235,29 @@ const ShiftLogList = () => {
         );
     }
 
-    // if (error) {
-    //     return (
-    //         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-    //             <strong className="font-bold">Error!</strong>
-    //             <span className="block sm:inline"> {error}</span>
-    //         </div>
-    //     );
-    // }
+    if (error) {
+        return (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong className="font-bold">Error!</strong>
+                <span className="block sm:inline"> {error}</span>
+            </div>
+        );
+    }
 
     return (
         <div>
             <Navbar />
+
             <div className="container mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold mb-6 text-gray-800">Shift Logs</h1>
                 <div className="mb-6 flex space-x-4">
-                    <button onClick={exportToPDF} className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300">
+                    <button onClick={exportAllToPDF} className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300">
                         <DocumentTextIcon className="h-5 w-5 mr-2" />
-                        Export to PDF
+                        Export All to PDF
                     </button>
-                    <button onClick={exportToExcel} className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300">
+                    <button onClick={exportAllToExcel} className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300">
                         {/* <TableIcon className="h-5 w-5 mr-2" /> */}
-                        Export to Excel
+                        Export All to Excel
                     </button>
                 </div>
                 <div className="space-y-6">
@@ -228,8 +322,23 @@ const ShiftLogList = () => {
                                             <p>{summaries[log._id]}</p>
                                         </div>
                                     )}
+                                    <div className="mt-4 flex space-x-4">
+                                        <button
+                                            onClick={() => exportLogToPDF(log)}
+                                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+                                        >
+                                            <DocumentTextIcon className="h-5 w-5 mr-2" />
+                                            Export to PDF
+                                        </button>
+                                        <button
+                                            onClick={() => exportLogToExcel(log)}
+                                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300"
+                                        >
+                                            Export to Excel
+                                        </button>
+                                    </div>
                                     <button
-                                        onClick={() => generateSummary(log._id)}
+                                        onClick={() => handleGenerateSummary(log._id)}
                                         className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-300"
                                     >
                                         {summaries[log._id] ? 'Regenerate Summary' : 'Generate Summary'}
@@ -245,7 +354,3 @@ const ShiftLogList = () => {
 };
 
 export default ShiftLogList;
-
-
-
-

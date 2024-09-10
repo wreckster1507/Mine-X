@@ -3,6 +3,7 @@ import Home from './components/Home';
 import Login from './components/Login';
 import ShiftLogForm from './components/ShiftLogForm';
 import ShiftLogList from './components/ShiftLogList';
+import SummaryPage from './components/SummaryPage';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/shiftLogForm" element={<ShiftLogForm />} />
         <Route path="/shiftLogList" element={<ShiftLogList />} />
+        <Route path="/summary/:logId" element={<SummaryPage />} />
       </Routes>
     </Router>
   );
