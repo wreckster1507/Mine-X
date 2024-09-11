@@ -24,7 +24,7 @@ const ShiftLogList = () => {
     const fetchLogs = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/shiftLogs",
+          "https://mine-x-server-api.onrender.com/api/shiftLogs",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -50,7 +50,7 @@ const ShiftLogList = () => {
       if (!log) return;
 
       const response = await axios.post(
-        "http://localhost:5000/api/generateSummary",
+        "https://mine-x-server-api.onrender.com/api/generateSummary",
         { shiftLog: log },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
