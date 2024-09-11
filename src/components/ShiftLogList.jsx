@@ -16,6 +16,7 @@ const ShiftLogList = () => {
   const [summaries, setSummaries] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [generateSummaryLoader, setGenerateSummaryLoader] = useState(false);
   const [expandedLogs, setExpandedLogs] = useState({});
   const navigate = useNavigate(); // Initialize navigate for navigation
 
@@ -43,6 +44,7 @@ const ShiftLogList = () => {
   }, []);
 
   const handleGenerateSummary = async (logId) => {
+    setGenerateSummaryLoader(true);
     try {
       const log = shiftLogs.find((log) => log._id === logId);
       if (!log) return;
@@ -511,9 +513,16 @@ const ShiftLogList = () => {
                   </div>
                   <button
                     onClick={() => handleGenerateSummary(log._id)}
-                    className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-300"
+                    className={`mt-4 px-4 py-2 rounded-md transition duration-300 flex items-center justify-center ${
+                      generateSummaryLoader
+                        ? "bg-indigo-500 text-white cursor-not-allowed"
+                        : "bg-indigo-600 text-white hover:bg-indigo-700"
+                    }`}
+                    disabled={generateSummaryLoader}
                   >
-                    {summaries[log._id]
+                    {generateSummaryLoader
+                      ? "Generating Reports..."
+                      : summaries[log._id]
                       ? "Regenerate Summary"
                       : "Generate Summary"}
                   </button>
