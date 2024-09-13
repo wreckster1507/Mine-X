@@ -5,6 +5,8 @@ import ShiftLogForm from './components/ShiftLogForm';
 import ShiftLogList from './components/ShiftLogList';
 import SummaryPage from './components/SummaryPage';
 import About from './components/About';
+import Contact from './components/Contact';
+import PageNotFound from './components/PageNotFound';
 
 function App() {
 
@@ -21,6 +23,8 @@ function App() {
         <Route path="/shiftLogList" element={<ShiftLogList />} />
         <Route path="/summary/:logId" element={<SummaryPage />} />
         <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Router>
 
