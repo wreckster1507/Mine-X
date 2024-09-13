@@ -316,7 +316,7 @@ const ShiftLogList = () => {
     <div>
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container  mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6 text-gray-800">Shift Logs</h1>
         <div className="mb-6 flex space-x-4">
           <button
@@ -362,10 +362,10 @@ const ShiftLogList = () => {
                       log.shift === "Morning"
                         ? "text-yellow-500"
                         : log.shift === "Afternoon"
-                        ? "text-orange-500"
-                        : log.shift === "Evening"
-                        ? "text-purple-500"
-                        : "text-gray-600"
+                          ? "text-orange-500"
+                          : log.shift === "Evening"
+                            ? "text-purple-500"
+                            : "text-gray-600"
                     }
                   >
                     {log.shift}
@@ -513,18 +513,17 @@ const ShiftLogList = () => {
                   </div>
                   <button
                     onClick={() => handleGenerateSummary(log._id)}
-                    className={`mt-4 px-4 py-2 rounded-md transition duration-300 flex items-center justify-center ${
-                      generateSummaryLoader
-                        ? "bg-indigo-500 text-white cursor-not-allowed"
-                        : "bg-indigo-600 text-white hover:bg-indigo-700"
-                    }`}
+                    className={`mt-4 px-4 py-2 rounded-md transition duration-300 flex items-center justify-center ${generateSummaryLoader
+                      ? "bg-indigo-500 text-white cursor-not-allowed"
+                      : "bg-indigo-600 text-white hover:bg-indigo-700"
+                      }`}
                     disabled={generateSummaryLoader}
                   >
                     {generateSummaryLoader
                       ? "Generating Reports..."
                       : summaries[log._id]
-                      ? "Regenerate Summary"
-                      : "Generate Summary"}
+                        ? "Regenerate Summary"
+                        : "Generate Summary"}
                   </button>
                 </div>
               )}

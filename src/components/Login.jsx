@@ -14,7 +14,7 @@ const Login = () => {
 
         try {
             // Send login request to the backend
-            const response = await axios.post('http://localhost:3000/auth/login', {
+            const response = await axios.post('https://mine-x-server-api.onrender.com/auth/login', {
                 username: username,
                 password: password
             });

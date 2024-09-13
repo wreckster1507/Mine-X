@@ -76,7 +76,7 @@ const ShiftLogForm = () => {
   return (
     <div>
       <Navbar />
-      <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg m-2">
         <h1 className="text-3xl font-bold mb-6 text-gray-800">
           Submit Shift Log
         </h1>

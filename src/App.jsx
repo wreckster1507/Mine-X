@@ -4,6 +4,7 @@ import Login from './components/Login';
 import ShiftLogForm from './components/ShiftLogForm';
 import ShiftLogList from './components/ShiftLogList';
 import SummaryPage from './components/SummaryPage';
+import About from './components/About';
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
         <Route path="/shiftLogForm" element={<ShiftLogForm />} />
         <Route path="/shiftLogList" element={<ShiftLogList />} />
         <Route path="/summary/:logId" element={<SummaryPage />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </Router>
 
